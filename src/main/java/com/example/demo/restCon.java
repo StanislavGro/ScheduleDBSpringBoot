@@ -6,6 +6,7 @@ import com.example.demo.rep.GroupDAO;
 import com.example.demo.rep.ScheduleDAO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -95,5 +96,42 @@ public class restCon {
         scheduleDAO.save(schedule);
         return schedule;
     }
+
+    @Transactional
+    @CrossOrigin
+    @PostMapping("/groups/delete")
+    @ApiOperation("Removing group")
+    public void deleteGroup(Long groupID) {
+        try{
+            groupDAO.deleteById(groupID);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    @CrossOrigin
+    @PostMapping("/auditories/delete")
+    @ApiOperation("Removing auditory")
+    public void deleteAuditory(Long auditoryID) {
+        try{
+            auditoryDAO.deleteById(auditoryID);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    @CrossOrigin
+    @PostMapping("/schedules/delete")
+    @ApiOperation("Removing schedule")
+    public void deleteSchedule(Long scheduleID) {
+        try{
+            scheduleDAO.deleteById(scheduleID);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
 
 }
