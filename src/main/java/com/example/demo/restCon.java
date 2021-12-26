@@ -136,39 +136,52 @@ public class restCon {
     @CrossOrigin
     @PutMapping("/auditory/update")
     @ApiOperation("Updating auditory")
-    public void updateAuditory(long id, String auditoryStr) {
+    public void updateAuditory(long id, String auditoryStr) throws Exception {
         List<Auditory> auditories = new ArrayList<>();
         auditoryDAO.findAll().forEach(auditories::add);
+        Auditory auditory = null;
 
         for(Auditory au: auditories){
             if(au.getId() == id) {
-                Auditory auditory = new Auditory(id, auditoryStr);
+                auditory = new Auditory(id, auditoryStr);
                 auditoryDAO.save(auditory);
+                return;
             }
         }
+
+        if(auditory == null)
+            throw new Exception("Didn't find such auditory");
+
     }
 
     @CrossOrigin
     @PutMapping("/group/update")
     @ApiOperation("Updating group")
-    public void updateGroup(long id, String groupStr) {
+    public void updateGroup(long id, String groupStr) throws Exception {
         List<Group> groups = new ArrayList<>();
         groupDAO.findAll().forEach(groups::add);
+        Group group = null;
 
         for(Group gr : groups){
             if(gr.getId() == id) {
-                Group group = new Group(id, groupStr);
+                group = new Group(id, groupStr);
                 groupDAO.save(group);
+                return;
             }
         }
+
+        if(group == null)
+            throw new Exception("Didn't find such group");
+
     }
 
     @CrossOrigin
     @PutMapping("/schedules/update")
     @ApiOperation("Updating schedule")
-    public void updateSchedule(long id, int week, String day, String timeStart, String timeEnd, String group, String auditory) {
+    public void updateSchedule(long id, int week, String day, String timeStart, String timeEnd, String group, String auditory) throws Exception{
         List<Schedule> schedules = new ArrayList<>();
         scheduleDAO.findAll().forEach(schedules::add);
+        Schedule schedule = null;
 
         for(Schedule sc : schedules){
             if(sc.getId() == id) {
@@ -188,10 +201,14 @@ public class restCon {
                     if(au.getAuditory().equals(auditory1.getAuditory()))
                         auditory1.setId(au.getId());
                 }
-                Schedule schedule = new Schedule(id,week,day1,time, group1, auditory1);
+                schedule = new Schedule(id,week,day1,time, group1, auditory1);
                 scheduleDAO.save(schedule);
             }
         }
+
+        if(schedule == null)
+            throw new Exception("Didn't find such schedule");
+
     }
 
 }
