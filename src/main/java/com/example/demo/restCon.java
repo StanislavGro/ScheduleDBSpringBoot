@@ -99,7 +99,7 @@ public class restCon {
 
     @Transactional
     @CrossOrigin
-    @PostMapping("/groups/delete")
+    @DeleteMapping("/groups/delete")
     @ApiOperation("Removing group")
     public void deleteGroup(Long groupID) {
         try{
@@ -111,7 +111,7 @@ public class restCon {
 
     @Transactional
     @CrossOrigin
-    @PostMapping("/auditories/delete")
+    @DeleteMapping("/auditories/delete")
     @ApiOperation("Removing auditory")
     public void deleteAuditory(Long auditoryID) {
         try{
@@ -123,7 +123,7 @@ public class restCon {
 
     @Transactional
     @CrossOrigin
-    @PostMapping("/schedules/delete")
+    @DeleteMapping("/schedules/delete")
     @ApiOperation("Removing schedule")
     public void deleteSchedule(Long scheduleID) {
         try{
@@ -133,5 +133,65 @@ public class restCon {
         }
     }
 
+    @CrossOrigin
+    @PutMapping("/auditory/update")
+    @ApiOperation("Updating auditory")
+    public void updateAuditory(long id, String auditoryStr) {
+        List<Auditory> auditories = new ArrayList<>();
+        auditoryDAO.findAll().forEach(auditories::add);
+
+        for(Auditory au: auditories){
+            if(au.getId() == id) {
+                Auditory auditory = new Auditory(id, auditoryStr);
+                auditoryDAO.save(auditory);
+            }
+        }
+    }
+
+    @CrossOrigin
+    @PutMapping("/group/update")
+    @ApiOperation("Updating group")
+    public void updateGroup(long id, String groupStr) {
+        List<Group> groups = new ArrayList<>();
+        groupDAO.findAll().forEach(groups::add);
+
+        for(Group gr : groups){
+            if(gr.getId() == id) {
+                Group group = new Group(id, groupStr);
+                groupDAO.save(group);
+            }
+        }
+    }
+
+    @CrossOrigin
+    @PutMapping("/schedules/update")
+    @ApiOperation("Updating schedule")
+    public void updateSchedule(long id, int week, String day, String timeStart, String timeEnd, String group, String auditory) {
+        List<Schedule> schedules = new ArrayList<>();
+        scheduleDAO.findAll().forEach(schedules::add);
+
+        for(Schedule sc : schedules){
+            if(sc.getId() == id) {
+                Day day1 = new Day(day);
+                Time time = new Time(timeStart,timeEnd);
+                Group group1 = new Group(group);
+                List<Group> groups = new ArrayList<>();
+                groupDAO.findAll().forEach(groups::add);
+                for(Group gr: groups){
+                    if(gr.getGroup().equals(group1.getGroup()))
+                        group1.setId(gr.getId());
+                }
+                List<Auditory> auditories = new ArrayList<>();
+                auditoryDAO.findAll().forEach(auditories::add);
+                Auditory auditory1 = new Auditory(auditory);
+                for(Auditory au : auditories){
+                    if(au.getAuditory().equals(auditory1.getAuditory()))
+                        auditory1.setId(au.getId());
+                }
+                Schedule schedule = new Schedule(id,week,day1,time, group1, auditory1);
+                scheduleDAO.save(schedule);
+            }
+        }
+    }
 
 }

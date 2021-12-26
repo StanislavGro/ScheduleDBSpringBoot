@@ -23,7 +23,7 @@ public class Auditory implements Serializable {
 
     public Auditory(){}
 
-    public Auditory(int id, String auditory){
+    public Auditory(long id, String auditory){
         this.id = id;
         this.auditory = auditory;
         scheduleList = new ArrayList<>();
