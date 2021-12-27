@@ -30,7 +30,7 @@ public class restCon {
     private GroupDAO groupDAO;
 
     @CrossOrigin
-    @GetMapping("/schedules/get")
+    @GetMapping
     @ApiOperation("Getting schedules")
     public List<Schedule> getSchedules() {
         List<Schedule> schedules = new ArrayList<>();
@@ -75,7 +75,7 @@ public class restCon {
     }
 
     @CrossOrigin
-    @PostMapping("/schedules/post")
+    @PostMapping
     @ApiOperation("Adding a new schedule")
     public Schedule addSchedule(@RequestBody ScheduleRequest scheduleReq) {
         boolean isGroup = false, isAudit = false;
@@ -138,7 +138,7 @@ public class restCon {
 
     @Transactional
     @CrossOrigin
-    @DeleteMapping("/schedules/{scheduleID}")
+    @DeleteMapping("/{scheduleID}")
     @ApiOperation("Removing schedule")
     public ResponseEntity deleteSchedule(@RequestParam Long scheduleID) {
         try {
@@ -151,80 +151,112 @@ public class restCon {
     }
 
     @CrossOrigin
-    @PutMapping("/auditories")
+    @PutMapping("/auditories/{auditoryID}")
     @ApiOperation("Updating auditory")
-    public void updateAuditory(long id, String auditoryStr) throws Exception {
-        List<Auditory> auditories = new ArrayList<>();
-        auditoryDAO.findAll().forEach(auditories::add);
-        Auditory auditory = null;
+    public ResponseEntity updateAuditory(@RequestParam long id, @RequestBody AuditoryRequest auditoryRequest) {
 
-        for (Auditory au : auditories) {
-            if (au.getId() == id) {
-                auditory = new Auditory(id, auditoryStr);
-                auditoryDAO.save(auditory);
-                return;
+        try {
+            List<Auditory> auditories = new ArrayList<>();
+            auditoryDAO.findAll().forEach(auditories::add);
+            Auditory newAuditory = null;
+
+            for (Auditory au : auditories) {
+                if (au.getId() == id) {
+                    newAuditory = new Auditory(id, auditoryRequest.getAuditory());
+                    auditoryDAO.save(newAuditory);
+                    return ResponseEntity.status(HttpStatus.OK).build();
+                }
             }
-        }
 
-        if (auditory == null)
             throw new Exception("Didn't find such auditory");
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e);
+        }
     }
 
     @CrossOrigin
-    @PutMapping("/groups")
+    @PutMapping("/groups/{groupID}")
     @ApiOperation("Updating group")
-    public void updateGroup(long id, String groupStr) throws Exception {
-        List<Group> groups = new ArrayList<>();
-        groupDAO.findAll().forEach(groups::add);
-        Group group = null;
+    public ResponseEntity updateGroup(@RequestParam long id, @RequestBody GroupRequest groupRequest){
 
-        for (Group gr : groups) {
-            if (gr.getId() == id) {
-                group = new Group(id, groupStr);
-                groupDAO.save(group);
-                return;
+        try {
+            List<Group> groups = new ArrayList<>();
+            groupDAO.findAll().forEach(groups::add);
+            Group newGroup = null;
+
+            for (Group gr : groups) {
+                if (gr.getId() == id) {
+                    newGroup = new Group(id, groupRequest.getGroup());
+                    groupDAO.save(newGroup);
+                    return ResponseEntity.status(HttpStatus.OK).build();
+                }
             }
-        }
 
-        if (group == null)
             throw new Exception("Didn't find such group");
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e);
+        }
+
     }
 
     @CrossOrigin
-    @PutMapping("/schedules/update")
+    @PutMapping("/{scheduleID}")
     @ApiOperation("Updating schedule")
-    public void updateSchedule(long id, int week, String day, String timeStart, String timeEnd, String group, String auditory) throws Exception {
-        List<Schedule> schedules = new ArrayList<>();
-        scheduleDAO.findAll().forEach(schedules::add);
-        Schedule schedule = null;
+    public ResponseEntity updateSchedule(@RequestParam long id, @RequestBody ScheduleRequest scheduleReq){
 
-        for (Schedule sc : schedules) {
-            if (sc.getId() == id) {
-                Day day1 = new Day(day);
-                Time time = new Time(timeStart, timeEnd);
-                Group group1 = new Group(group);
-                List<Group> groups = new ArrayList<>();
-                groupDAO.findAll().forEach(groups::add);
-                for (Group gr : groups) {
-                    if (gr.getGroup().equals(group1.getGroup()))
-                        group1.setId(gr.getId());
+        try {
+
+            List<Schedule> schedules = new ArrayList<>();
+            scheduleDAO.findAll().forEach(schedules::add);
+            Schedule schedule = null;
+
+            for (Schedule sc : schedules) {
+                if (sc.getId() == id) {
+
+                    boolean isGroup = false, isAudit = false;
+                    Day day = new Day(scheduleReq.getDay().getDay());
+                    Time time = new Time(scheduleReq.getTime().getTimeStart(), scheduleReq.getTime().getTimeEnd());
+                    List<Group> groups = new ArrayList<>();
+                    Group group = new Group(scheduleReq.getGroup().getGroup());
+                    groupDAO.findAll().forEach(groups::add);
+                    for (Group gr : groups) {
+                        if (gr.getGroup().equals(group.getGroup())) {
+                            group.setId(gr.getId());
+                            isGroup = true;
+                        }
+                    }
+                    if (!isGroup) {
+                        groupDAO.save(group);
+                    }
+                    Auditory auditory = new Auditory(scheduleReq.getAuditory().getAuditory());
+                    List<Auditory> auditories = new ArrayList<>();
+                    auditoryDAO.findAll().forEach(auditories::add);
+                    for (Auditory au : auditories) {
+                        if (au.getAuditory().equals(auditory.getAuditory())) {
+                            auditory.setId(au.getId());
+                            isAudit = true;
+                        }
+                    }
+                    if (!isAudit) {
+                        auditoryDAO.save(auditory);
+                    }
+
+                    scheduleDAO.save(new Schedule(id, scheduleReq.getWeek(), day, time,group,auditory));
+                    return ResponseEntity.status(HttpStatus.OK).build();
+
                 }
-                List<Auditory> auditories = new ArrayList<>();
-                auditoryDAO.findAll().forEach(auditories::add);
-                Auditory auditory1 = new Auditory(auditory);
-                for (Auditory au : auditories) {
-                    if (au.getAuditory().equals(auditory1.getAuditory()))
-                        auditory1.setId(au.getId());
-                }
-                schedule = new Schedule(id, week, day1, time, group1, auditory1);
-                scheduleDAO.save(schedule);
             }
-        }
 
-        if (schedule == null)
             throw new Exception("Didn't find such schedule");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e);
+        }
 
     }
 
