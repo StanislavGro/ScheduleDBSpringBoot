@@ -1,11 +1,7 @@
-package com.example.demo.entity;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+package com.example.demo.entity.response;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "day_table")

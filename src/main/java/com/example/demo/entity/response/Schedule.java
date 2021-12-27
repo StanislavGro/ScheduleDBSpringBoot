@@ -1,6 +1,5 @@
-package com.example.demo.entity;
+package com.example.demo.entity.response;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
