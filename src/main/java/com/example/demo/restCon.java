@@ -86,7 +86,7 @@ public class restCon {
         groupDAO.findAll().forEach(groups::add);
         for (Group gr : groups) {
             if (gr.getGroup().equals(group.getGroup())) {
-                group.setId(gr.getId());
+                group = gr;
                 isGroup = true;
             }
         }
@@ -98,7 +98,7 @@ public class restCon {
         auditoryDAO.findAll().forEach(auditories::add);
         for (Auditory au : auditories) {
             if (au.getAuditory().equals(auditory.getAuditory())) {
-                auditory.setId(au.getId());
+                auditory = au;
                 isAudit = true;
             }
         }
@@ -112,7 +112,7 @@ public class restCon {
     @CrossOrigin
     @DeleteMapping("/groups/{groupID}")
     @ApiOperation("Removing group")
-    public ResponseEntity deleteGroup(@RequestParam Long groupID) {
+    public ResponseEntity deleteGroup(@PathVariable Long groupID) {
         try {
             groupDAO.deleteById(groupID);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -126,7 +126,7 @@ public class restCon {
     @CrossOrigin
     @DeleteMapping("/auditories/{auditoryID}")
     @ApiOperation("Removing auditory")
-    public ResponseEntity deleteAuditory(@RequestParam Long auditoryID) {
+    public ResponseEntity deleteAuditory(@PathVariable Long auditoryID) {
         try {
             auditoryDAO.deleteById(auditoryID);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -140,7 +140,7 @@ public class restCon {
     @CrossOrigin
     @DeleteMapping("/{scheduleID}")
     @ApiOperation("Removing schedule")
-    public ResponseEntity deleteSchedule(@RequestParam Long scheduleID) {
+    public ResponseEntity deleteSchedule(@PathVariable Long scheduleID) {
         try {
             scheduleDAO.deleteById(scheduleID);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -153,7 +153,7 @@ public class restCon {
     @CrossOrigin
     @PutMapping("/auditories/{auditoryID}")
     @ApiOperation("Updating auditory")
-    public ResponseEntity updateAuditory(@RequestParam long id, @RequestBody AuditoryRequest auditoryRequest) {
+    public ResponseEntity updateAuditory(@PathVariable Long auditoryID, @RequestBody AuditoryRequest auditoryRequest) {
 
         try {
             List<Auditory> auditories = new ArrayList<>();
@@ -161,8 +161,10 @@ public class restCon {
             Auditory newAuditory = null;
 
             for (Auditory au : auditories) {
-                if (au.getId() == id) {
-                    newAuditory = new Auditory(id, auditoryRequest.getAuditory());
+                if (au.getId() == auditoryID) {
+                    newAuditory = au;
+                    newAuditory.setAuditory(auditoryRequest.getAuditory());
+//                    newAuditory = new Auditory(id, auditoryRequest.getAuditory());
                     auditoryDAO.save(newAuditory);
                     return ResponseEntity.status(HttpStatus.OK).build();
                 }
@@ -179,7 +181,7 @@ public class restCon {
     @CrossOrigin
     @PutMapping("/groups/{groupID}")
     @ApiOperation("Updating group")
-    public ResponseEntity updateGroup(@RequestParam long id, @RequestBody GroupRequest groupRequest){
+    public ResponseEntity updateGroup(@PathVariable Long groupID, @RequestBody GroupRequest groupRequest){
 
         try {
             List<Group> groups = new ArrayList<>();
@@ -187,8 +189,10 @@ public class restCon {
             Group newGroup = null;
 
             for (Group gr : groups) {
-                if (gr.getId() == id) {
-                    newGroup = new Group(id, groupRequest.getGroup());
+                if (gr.getId() == groupID) {
+                    newGroup = gr;
+                    newGroup.setGroup(groupRequest.getGroup());
+//                    newGroup = new Group(id, groupRequest.getGroup());
                     groupDAO.save(newGroup);
                     return ResponseEntity.status(HttpStatus.OK).build();
                 }
@@ -206,7 +210,7 @@ public class restCon {
     @CrossOrigin
     @PutMapping("/{scheduleID}")
     @ApiOperation("Updating schedule")
-    public ResponseEntity updateSchedule(@RequestParam long id, @RequestBody ScheduleRequest scheduleReq){
+    public ResponseEntity updateSchedule(@PathVariable Long scheduleID, @RequestBody ScheduleRequest scheduleReq){
 
         try {
 
@@ -215,7 +219,7 @@ public class restCon {
             Schedule schedule = null;
 
             for (Schedule sc : schedules) {
-                if (sc.getId() == id) {
+                if (sc.getId() == scheduleID) {
 
                     boolean isGroup = false, isAudit = false;
                     Day day = new Day(scheduleReq.getDay().getDay());
@@ -225,7 +229,9 @@ public class restCon {
                     groupDAO.findAll().forEach(groups::add);
                     for (Group gr : groups) {
                         if (gr.getGroup().equals(group.getGroup())) {
-                            group.setId(gr.getId());
+                            group = gr;
+                            group.setGroup(gr.getGroup());
+//                            group.setId(gr.getId());
                             isGroup = true;
                         }
                     }
@@ -237,7 +243,9 @@ public class restCon {
                     auditoryDAO.findAll().forEach(auditories::add);
                     for (Auditory au : auditories) {
                         if (au.getAuditory().equals(auditory.getAuditory())) {
-                            auditory.setId(au.getId());
+                            auditory = au;
+                            auditory.setAuditory(au.getAuditory());
+//                            auditory.setId(au.getId());
                             isAudit = true;
                         }
                     }
@@ -245,7 +253,7 @@ public class restCon {
                         auditoryDAO.save(auditory);
                     }
 
-                    scheduleDAO.save(new Schedule(id, scheduleReq.getWeek(), day, time,group,auditory));
+                    scheduleDAO.save(new Schedule(scheduleID, scheduleReq.getWeek(), day, time,group,auditory));
                     return ResponseEntity.status(HttpStatus.OK).build();
 
                 }
